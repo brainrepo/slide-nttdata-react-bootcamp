@@ -1,0 +1,1071 @@
+import { themes } from 'mdx-deck'
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer";
+import { nightOwl, github } from "@code-surfer/themes";
+import imageComponents from "./images/components.jpg";
+import { Split, SplitRight} from 'mdx-deck'
+import Layout from './Layout'
+
+export const theme = nightOwl
+export const themesCode = [nightOwl, github]
+import splitComponents from "./images/split-components.gif";
+
+
+<Split>
+
+<img alt="me" src="http://www.gitbar.it/static/151751c7a7795ca87f026014fc95f835/2a4de/me.png" />
+
+
+## whoami  Mauro Murru
+
+ 💻 Senior Full Stack Developer
+
+ 🎙Podcaster - host of Gitbar.it
+
+ 🛩 Digital nomad - Lyon 🇫🇷 Olbia 🇮🇹
+
+
+</Split>
+
+---
+
+# REACT - BOOTCAMP
+
+---
+
+<Layout>
+
+## Una libreria JavaScript per creare interfacce utente
+
+- Dichiarativa
+- Componenti
+- Riusabile
+
+</Layout>
+
+---
+
+<Layout>
+
+### 📐 Dichiarativa
+
+Definisci la forma dei tuoi componenti e 
+sarà react a lavorare <br/>
+per aggiornare il dom al cambio di stato
+
+</Layout>
+
+---
+
+<Layout>
+ 
+
+### 🧱 Componenti
+
+Divide et impera, single responsibility le <br />
+regole per creare sistemi scalabili e riusabili.
+
+</Layout> 
+
+---
+
+<Layout>
+
+
+### ♻️ Riusabili
+
+Riusabile per creare applicazioni native con *React native* <br />
+e componenti server come il SSR - Server Side Rendering
+
+</Layout>
+
+---
+
+<Layout>
+
+<img src="http://www.quickmeme.com/img/7e/7e12f2bf903bcb56c97fb18a86cc3f5f0429730f40aa92595acab1905abe2b4c.jpg" />
+
+</Layout>
+
+---
+
+<Layout>
+
+# I componenti
+
+I Componenti ti permettono di suddividere la UI (User Interface, o interfaccia utente) in parti 
+
+- indipendenti, 
+- riutilizzabili 
+- e di pensare ad ognuna di esse in modo isolato.
+
+
+</Layout> 
+
+---
+
+<Layout>
+
+<img src={imageComponents}/>
+
+
+</Layout> 
+
+---
+
+<Layout>
+
+Concettualmente, i componenti sono come funzioni JavaScript: 
+
+- accettano in input dati arbitrari (sotto il nome di “props”) 
+- ritornano elementi React che descrivono cosa dovrebbe apparire sullo schermo.
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js 1[15:20],2[10:37]
+function Ciao(props) {
+  return <h1>Ciao, {props.nome}</h1>;
+}
+```
+
+```js 3[12:44]
+class Ciao extends React.Component {
+  render() {
+    return <h1>Ciao, {this.props.nome}</h1>;
+  }
+}
+```
+
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+### JSX, che roba è?
+
+JSX è un Markup language usato per creare **React elements**. <br />
+Può essere usato per creare componenti semplici o complessi.
+
+</Layout> 
+
+---
+
+<Layout>
+
+<img src="https://i.pinimg.com/736x/c9/55/72/c95572674687950574f007d9d3c863f3.jpg" />
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js  title="Babel compila JSX in chiamate a React.createElement()"
+const element = (
+  <h1 className="greeting">
+    Hello, world!
+  </h1>
+);
+```
+
+```js 
+const element = React.createElement(
+  'h1',
+  {className: 'greeting'},
+  'Hello, world!'
+);
+```
+
+</CodeSurfer>
+
+</Layout>
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js title="React renderizza poi i react elements"
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+
+```
+
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js title="React renderizza poi i react elements"
+
+function Ciao(props) {
+  return <h1>Ciao, {props.nome}</h1>;
+}
+
+const elemento = <Ciao nome="Sara" />;
+
+ReactDOM.render(
+  elemento,
+  document.getElementById('root')
+);
+```
+
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+## La composizione
+
+- I componenti possono far riferimento ad **altri componenti** nel loro **output**.
+
+- Normalmente, le nuove applicazioni React hanno un singolo <br/> componente chiamato 
+**App** al livello più alto che **racchiude tutti gli altri componenti**.
+
+</Layout> 
+
+---
+
+<Layout>
+
+<Split>
+
+<img src={splitComponents}/>
+
+### Estrarre Componenti
+
+Non aver paura di suddividere i componenti in componenti più piccoli.
+
+
+
+</Split>
+</Layout> 
+
+---
+
+<Layout>
+
+
+<CodeSurfer>
+
+```js title="Componente"
+
+function Commento(props) {
+  return (
+    <div className="Commento">
+      <div className="InfoUtente">
+        <img className="Avatar"
+          src={props.autore.avatarUrl}
+          alt={props.autore.nome}
+        />
+        <div className="InfoUtente-nome">
+          {props.autore.nome}
+        </div>
+      </div>
+      <div className="Commento-testo">
+        {props.testo}
+      </div>
+      <div className="Commento-data">
+        {formatDate(props.data)}
+      </div>
+    </div>
+  );
+}
+```
+
+```js 6[9:32],7:8,9[9:11] title="Avatar può diventare un componente"
+
+function Commento(props) {
+  return (
+    <div className="Commento">
+      <div className="InfoUtente">
+        <img className="Avatar"
+          src={props.autore.avatarUrl}
+          alt={props.autore.nome}
+        />
+        <div className="InfoUtente-nome">
+          {props.autore.nome}
+        </div>
+      </div>
+      <div className="Commento-testo">
+        {props.testo}
+      </div>
+      <div className="Commento-data">
+        {formatDate(props.data)}
+      </div>
+    </div>
+  );
+}
+```
+
+```js 6[9:41] title="Avatar è un nuovo componente"
+
+function Commento(props) {
+  return (
+    <div className="Commento">
+      <div className="InfoUtente">
+        <Avatar utente={props.autore} />
+        <div className="InfoUtente-nome">
+          {props.autore.nome}
+        </div>
+      </div>
+      <div className="Commento-testo">
+        {props.testo}
+      </div>
+      <div className="Commento-data">
+        {formatDate(props.data)}
+      </div>
+    </div>
+  );
+}
+```
+
+```js title="Avatar è un nuovo componente"
+
+function Avatar(props) {
+  return (
+    <img className="Avatar"
+      src={props.utente.avatarUrl}
+      alt={props.utente.nome}
+    />
+  );
+}
+```
+
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+## Le props 
+
+Le props sono tutti quegli oggetti, funzioni, stringhe, numeri, array, ecc. <br/>
+che vogliamo inviare ad un componente React. 
+
+Le props devono essere read-only. 
+
+Ciò sta a significare che un componente non deve mai modificare le props <br />
+che riceve in input.
+
+</Layout> 
+
+---
+
+<Layout>
+
+Funzioni di questo tipo vengono chiamate “pure” perché non provano <br />
+a cambiare i propri dati in input, <br /> 
+ritornano sempre lo stesso risultato a partire dagli stessi dati in ingresso.
+
+**Tutti i componenti React devono comportarsi come funzioni pure rispetto alle proprie props.**
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js 1[15:20],2[10:37]
+function Ciao(props) {
+  return <h1>Ciao, {props.nome}</h1>;
+}
+```
+
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+# Recap
+
+- React si basa sul concetto di **componenti** 
+- I componenti possono essere classi es6 o funzioni
+- I componenti prendo in ingresso le proprietà che possono essere components, int, string, array, objects, ecc...
+- I componenti restituiscono sempre un react element
+- Il react element verrà renderizzato in un tag del dom dalla funzione ReactDOM.render()
+- E' buona pratica creare dei componenti cercando di rispettare il principio delle **single responsibility** 
+
+</Layout> 
+
+---
+
+<Layout>
+<Split>
+
+# Iniziamo a sporcarci le mani
+
+<img width="300" src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy-downsized.gif" />
+
+</Split>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```bash title="Eseguiamo nel terminale" subtitle="Requisito: npm e node"
+    $ npm install -g create-react-app
+
+    $ npx create-react-app my-app
+    $ cd my-app
+    $ npm start
+
+```
+
+</CodeSurfer>
+</Layout>
+
+---
+
+<Layout>
+<CodeSurfer>
+
+```bash
+my-app
+├── README.md
+├── node_modules
+├── package.json
+├── .gitignore
+├── public
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+└── src
+    ├── App.css
+    ├── App.js
+    ├── App.test.js
+    ├── index.css
+    ├── index.js
+    ├── logo.svg
+    └── serviceWorker.js
+```
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js 4,7:13 title="src/index.js"
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import * as serviceWorker from './serviceWorker';
+
+ReactDOM.render( 
+  <React.StrictMode>
+      <App />
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://bit.ly/CRA-PWA
+serviceWorker.unregister();
+
+```
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js title="src/App.js"
+import React, { Component } from 'react'
+
+class App extends Component {
+
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="App">
+        la mia bellissima appp
+      </div>
+    );
+  }
+}
+
+export default App;
+
+```
+
+
+```js title="App è un componente definito mediante l'uso della classe component. Ora proviamo a renderlo un componente creato mediante una funzione pura!"
+import React from 'react'
+
+let App = (props) => {
+    return (
+      <div className="App">
+        la mia bellissima appp
+      </div>
+    );
+}
+
+export default App;
+
+```
+
+
+```js title="App è un componente definito mediante l'uso della classe component. Ora proviamo a renderlo un componente creato mediante una funzione pura!"
+import React from 'react'
+
+export default (props) => {
+    return (
+      <div className="App">
+        la mia bellissima appp
+      </div>
+    );
+}
+
+
+```
+</CodeSurfer>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<Split>
+
+
+
+<img width="300" src="https://media.giphy.com/media/5JCEYvy4M3HEY/200w_d.gif" />
+
+La dieta per il nostro componente
+
+Utilizzare componenti definiti mediante <br />l'uso di funzioni pure ci permettono di:
+
+**usare una sintassi meno verbosa**
+
+**minimizzare l'uso dello stato locale (lo vedremo poi)**
+
+**e poi ... la programmazione funzionale va di moda 😎**
+
+</Split>
+
+</Layout>
+
+
+
+---
+
+<Layout>
+
+# I componenti e le proprietà
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step title="Anatomia di un componente">
+
+```js
+import React from 'react';
+
+class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {this.props.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+export default Clock;
+```
+
+```js
+import React from 'react';
+
+function Clock(props) {
+  return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {props.date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+
+export default Clock;
+```
+
+</Step>
+
+<Step title="Un po di dieta">
+
+```js
+import React from 'react';
+
+export default class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {this.props.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+```js
+import React from 'react';
+
+export default (props) => {
+  return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {props.date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+```
+
+</Step>
+
+</CodeSurferColumns>
+</Layout>
+
+---
+<Layout>
+<SplitRight>
+
+![](https://s3.amazonaws.com/lowres.cartoonstock.com/accountants-time_zone-international_business-global_business-working_hour-work_hour-mfln8217_low.jpg)
+
+Passiamo il fuso orario <br />al nostro componente
+
+
+</SplitRight>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js
+import React from 'react';
+
+export default class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {this.props.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+```js
+import React from 'react';
+
+export default (props) => {
+  return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {props.date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+```
+
+</Step>
+
+<Step>
+
+```js
+import React from 'react';
+
+export default class Clock extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le 
+            {this.props.date.toLocaleTimeString(
+                "it_IT", 
+                {timeZone: this.props.timeZone})
+            }.
+        </h2>
+      </div>
+    );
+  }
+}
+```
+
+```js
+import React from 'react';
+
+export default (props) => {
+  return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le 
+            {props.date.toLocaleTimeString(
+                "it_IT", 
+                {timeZone: props.timeZone})
+            }.
+        </h2>
+    </div>
+  );
+}
+```
+
+</Step>
+
+<Step>
+
+```js
+import React from 'react';
+
+export default class Clock extends React.Component {
+
+  // passo le props per avere contezza che queste vengano prese correttamente
+  applyTimezone(date, timezone) {
+      return date.toLocaleTimeString("it_IT", 
+      {timeZone: timezone});
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>
+            Sono le {this.applyTimezone(this.props.date, this.props.timeZone)}
+        </h2>
+      </div>
+    );
+  }
+}
+```
+
+```js
+import React from 'react';
+
+export default (props) => {
+
+    let dateWithTimezone = () {
+            return props.date.toLocaleTimeString("it_IT", 
+            {timeZone: props.timeZone});
+        };
+
+    return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>
+            Sono le {dateWithTimezone()}
+        </h2>
+    </div>
+    );
+}
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+</Layout> 
+
+---
+
+<Layout>
+
+## Le props
+
+</Layout> 
+
+---
+
+<Layout>
+
+<img src="https://www.techdiagonal.com/wp-content/uploads/2019/09/react-props-blog-image-design.jpg" />
+
+</Layout> 
+
+---
+
+<Layout>
+
+## Le props sono inmodificabili
+
+Tutti i componenti React devono comportarsi come <br />
+funzioni pure rispetto alle proprie props.
+
+</Layout> 
+
+---
+
+<Layout>
+
+## Comunizazione top down
+
+Le props servono ai componenti per comunicare ai sottocomponenti
+
+</Layout> 
+
+---
+
+<Layout>
+
+# Lo stato 
+## La memoria locale del nostro componente
+
+ Lo stato permette ai componenti React di modificare il loro<br /> 
+ output nel tempo in seguito ad azioni dell’utente.
+
+</Layout> 
+
+---
+
+<Layout>
+
+<Split>
+
+<img src="https://media.giphy.com/media/26hitEYGDjIh8HjOg/giphy.gif" />
+
+
+Attenzione
+
+Lo stato rende il comportamento del vostro compononte non prevedibile
+**Usalo moderatamente** e solo dove strettamente necessario
+
+</Split>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<CodeSurferColumns themes={themesCode}>
+<Step>
+
+```js
+import React from 'react';
+
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+```
+
+```js
+import React, { useState } from 'react';
+
+function Clock() {
+  const [date, setDate] = useState(new Date());
+
+  return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+```
+
+</Step>
+</CodeSurferColumns>
+
+</Layout> 
+
+---
+
+<Layout>
+
+Ricordati che lo stato deve essere immutabile, quindi se si tratta di un oggetto non puo settarne proprietà ma dovrai crearne uno nuovo partendo dal precedente e su quello nuovo impostare cio che vuoi modificare
+
+</Layout> 
+
+---
+
+<Layout>
+
+# Component lifecycle
+
+Nelle applicazioni con molti componenti, è molto importante rilasciare le risorse occupate dai componenti quando questi vengono distrutti.
+
+</Layout> 
+
+---
+
+<Layout>
+
+Nel nostro caso, vogliamo impostare un timer ogni volta che Clock è 
+renderizzato nel DOM per la prima volta. 
+Questo è definito **mounting** (“montaggio”) in React.
+
+Vogliamo anche cancellare il timer ogni volta che il DOM prodotto da Clock viene rimosso. Questo è definito **“unmounting”** (“smontaggio”) in React.
+</Layout> 
+
+---
+
+
+<Layout>
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js
+
+class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {date: new Date()};
+  }
+
+  componentDidMount() {
+         this.timerID = setInterval(
+      () => this.tick(),
+      1000
+    );
+  }
+
+  componentWillUnmount() {
+      clearInterval(this.timerID);
+  }
+
+  tick() {
+    this.setState({
+      date: new Date()
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    );
+  }
+}
+
+```
+
+```js
+
+import React, { useState, useEffect } from 'react';
+
+function Clock() {
+
+  const [date, setDate] = useState(new Date());
+
+  useEffect(() => {
+    const timerID = setInterval(
+      () => setDate(date: new Date()),
+      1000
+    );
+
+    return () => clearInterval(timerID);
+  });
+
+  return (
+    <div>
+        <h1>Ciao, mondo!</h1>
+        <h2>Sono le {date.toLocaleTimeString()}.</h2>
+    </div>
+  );
+}
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+</Layout> 
+
+
+---
+
+<Layout>
+
+</Layout> 
+
+---
+
+<Layout>
+
+<Split>
+
+And now **CODE TIME** 
+
+<img src="https://media.giphy.com/media/KfwyWfTwMu1FG0XhO8/giphy.gif" />
+
+</Split>
+</Layout>
+
