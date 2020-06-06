@@ -1,0 +1,596 @@
+import { themes } from 'mdx-deck'
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer";
+import { nightOwl, github } from "@code-surfer/themes";
+import { Split, SplitRight} from 'mdx-deck'
+
+import Layout from "./Layout"
+
+import eventListenerImage from "./images/reactive/eventlistener.png";
+
+export const theme = nightOwl
+export const themesCode = [nightOwl, github]
+
+
+
+
+
+
+
+
+<Layout>
+
+#  JavaScript Events
+
+
+Any actions that you perform or any occurrence on the browser is an event. 
+
+
+- event loop
+
+- promises
+
+- reactive programming
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+
+
+
+<Layout>
+
+- page loads
+- click on the page
+- navigate the page
+- an error occurs
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Layout>
+
+<Split>
+
+<img src = {eventListenerImage} />
+
+## event handler / event listeners
+
+block of code, user-defined JavaScript Function
+
+runs when the event fires.
+
+</Split>
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Layout>
+
+# Ways of Using Web Events in JavaScript
+
+- Inline/HTML Event Handlers
+- Traditional DOM Event Handlers
+- addEventListener() and removeEventListener() 🤟
+- Using Parameters with Event Handlers and Listeners
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Layout>
+
+<CodeSurfer>
+
+```html title="Inline/HTML Event Handlers" subtitle="This is bad-practice 😡 this method is no longer in use"
+
+<button onclick = "changeColor()">
+
+<script type="text/javascript">
+      function changeColor(){
+        document.querySelector("button").style.backgroundColor = "blue"; 
+        //change background color
+        document.querySelector("button").style.color = "white"; 
+        //change font color
+      }
+</script>
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+---
+
+
+
+
+<Layout>
+
+<CodeSurfer>
+
+```html title="Traditional DOM Event Handlers" subtitle="This introduced in the original specification for the DOM, separates JavaScript from the HTML,  The drawback is that for any event, you can attach only one function "
+
+<script type="text/javascript">
+      var btn = document.querySelector("button");
+      function changeColor(){
+        btn.style.backgroundColor = "blue"; //change background color
+        btn.style.color = "white"; //change font color
+        document.querySelector("p").innerHTML = "Great! The button changed its color." //add text
+      }
+      btn.onclick = changeColor; //event handler
+</script>
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+
+
+<Layout>
+
+# addEventListener() and removeEventListener()
+
+introduced in an update to the DOM (DOM level2, in the year 2000)
+
+allow a single event to **trigger multiple functions**
+
+
+_This technique doesn’t work with the IE8 or earlier IE versions (use attachEvent)_ 😩
+
+
+</Layout>
+
+
+
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Layout>
+
+<CodeSurfer>
+
+```js
+
+// You can add an event listener to your event with the following syntax:
+target.addEventListener(type, listener [, useCapture]);
+
+//Or you can remove the event listener by using the syntax below:
+element.removeEventListener(“event”, functionName [, Boolean]);
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+---
+
+
+<Layout>
+
+- type: A case-sensitive string representing the event type to listen for https://developer.mozilla.org/en-US/docs/Web/Events
+
+- listener: The object that receives a notification Event. [EventListener interface, or () => {}]
+
+- options:  An additional optional object with properties:
+    
+    - once: if true, then the listener is automatically removed after it triggers.
+    
+    - capture: the phase where to handle the event. For historical reasons, options can also be false/true, that’s the same as {capture: false/true}.
+    
+    - passive: if true, then the handler will not call preventDefault().
+
+https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+<Layout>
+
+<CodeSurfer>
+
+```js title="Removal requires the same function" subtitle="To remove a handler we should pass exactly the same function as was assigned."
+
+elem.addEventListener( "click" , () => alert('Thanks!'));
+// ....
+elem.removeEventListener( "click", () => alert('Thanks!'));
+
+// Don't remove 😖
+
+```
+
+```js title="Removal requires the same function" subtitle="To remove a handler we should pass exactly the same function as was assigned."
+
+function handler() {
+  alert( 'Thanks!' );
+}
+
+input.addEventListener("click", handler);
+// ....
+input.removeEventListener("click", handler);
+
+// Removes 🤟
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+
+
+---
+
+import eventBubble from './images/reactive/event_bubble.jpg';
+
+<img style={{width:"600px"}} src={eventBubble} />
+
+https://javascript.info/bubbling-and-capturing
+
+
+---
+
+
+<Layout>
+
+<CodeSurfer>
+
+```html title="Event object" subtitle="When an event happens, the browser creates an event object"
+
+<input type="button" value="Click me" id="elem">
+
+<script>
+  elem.onclick = function(event) {
+    // show event type, element and coordinates of the click
+    alert(event.type + " at " + event.currentTarget);
+    alert("Coordinates: " + event.clientX + ":" + event.clientY);
+  };
+</script>
+```
+
+</CodeSurfer>
+
+</Layout>
+
+---
+
+<Layout>
+
+Some properties of event object:
+
+- event.type: element that triggered event.
+- event.currentTarget: element that has the event listener (this).
+
+  That’s exactly the same as this, 
+  - unless the handler is an **arrow function**, 
+  - or its this is **bound** to something else, 
+  - then we can get the element from **event.currentTarget**.
+  https://www.youtube.com/watch?v=SpatM1W5wRQ
+
+- event.clientX / event.clientY: Window-relative coordinates of the cursor, for pointer events.
+
+</Layout>
+
+---
+
+
+<Layout>
+
+<CodeSurfer>
+
+```html title="Bubbling" subtitle="This handler is assigned to div, but also runs if you click any nested tag like em or code" 
+  <div onclick="alert('The handler!')">
+    <em>If you click on <code>EM</code>, the handler on <code>DIV</code> runs.</em>
+  </div>
+
+```
+
+```html subtitle="When an event happens on an element, it first runs the handlers on it, then on its parent, then all the way up on other ancestors." 
+
+<form onclick="alert('form')">FORM
+  <div onclick="alert('div')">DIV
+    <p onclick="alert('p')">P</p>
+  </div>
+</form>
+
+```
+
+```html
+
+A click on the inner <p> first runs onclick:
+
+On that <p>.
+Then on the outer <div>.
+Then on the outer <form>.
+And so on upwards till the document object.
+
+So if we click on <p>, then we’ll see 3 alerts: p → div → form.
+
+🚨 Almost all events bubble. For instance, a **focus event** does not bubble. 
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+
+
+---
+
+
+
+
+<Layout>
+
+# Stopping bubbling
+
+A bubbling event goes from the target element straight up. 
+
+... -> ... -> html -> document object -> (some) window  
+
+calling all handlers on the path
+
+<hr />
+But any handler 
+
+**may decide that the event has been fully processed** 
+
+and **stop the bubbling**
+
+    event.stopPropagation();
+
+</Layout>
+
+
+
+---
+
+
+<Layout>
+
+# 🤯 Remember
+
+If an element *has multiple event handlers on a single event*, <br />
+then even if one of them stops the bubbling, 
+the *other ones still execute*.
+
+# then
+
+To stop the bubbling and prevent handlers on the **current element** from running, 
+
+
+    event.stopImmediatePropagation()
+
+After it no other handlers execute.
+
+</Layout>
+
+
+
+---
+
+
+<Layout>
+
+## Dispatching custom events
+
+We can also generate events from JavaScript.
+
+## Custom events can be used to create “graphical components”.
+
+</Layout>
+
+
+
+---
+
+<Layout>
+
+<CodeSurfer>
+
+```js title="Create event"
+
+let event = new Event(type[, options]);
+
+/*
+type – event type, a string like "click" or our own like "my-event".
+
+options – the object with two optional properties:
+
+  bubbles: true/false – if true, then the event bubbles.
+
+  cancelable: true/false – if true, then the “default action” 
+      may be prevented. Later we’ll see what it means for custom events.
+
+By default both are false: {bubbles: false, cancelable: false}.
+*/
+
+```
+
+```js title="Dispatch an event"
+
+<button id="elem" onclick="alert('Click!');">Autoclick</button>
+
+<script>
+  let event = new Event("click");
+  elem.dispatchEvent(event);
+</script>
+
+//The property ❗️event.isTrusted is true for events 
+//that come from real user actions and false 
+//for script-generated events.
+
+```
+
+```js title="Bubbling example"
+
+<h1 id="elem">Hello from the script!</h1>
+
+<script>
+  // catch on document...
+  document.addEventListener("hello", function(event) { // (1)
+    alert("Hello from " + event.target.tagName); // Hello from H1
+  });
+
+  // ...dispatch on elem!
+  let event = new Event("hello", {bubbles: true}); // (2)
+  elem.dispatchEvent(event);
+
+  // the handler on document will activate and display the message.
+
+</script>
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+
+
+---
+
+We need to add event informations ℹ️
+
+## Custom events
+
+is the same as Event but
+
+ 📦
+ 
+ in the second argument (object) we can add an additional property
+
+
+---
+
+
+
+
+
+<Layout>
+
+<CodeSurfer>
+
+```html subtitle="provides the special detail field for it to evade conflicts with other event properties"
+
+<h1 id="elem">Hello for John!</h1>
+
+<script>
+  // additional details come with the event to the handler
+  elem.addEventListener("hello", function(event) {
+    alert(event.detail.name);
+  });
+
+  elem.dispatchEvent(new CustomEvent("hello", {
+    detail: { name: "John" }
+  }));
+</script>
+
+
+```
+
+</CodeSurfer>
+
+</Layout>
+
+
+
+
+
+
+
+
+---
+
+
+# event.preventDefault()
+
+Many browser events have a “default action”, such as nagivating to a link, 
+
+starting a selection, and so on.
+
+
+---
+

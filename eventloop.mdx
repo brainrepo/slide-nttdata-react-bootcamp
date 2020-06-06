@@ -1,0 +1,2351 @@
+import { themes } from 'mdx-deck'
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer";
+import { nightOwl, github } from "@code-surfer/themes";
+import { Split, SplitRight} from 'mdx-deck'
+
+import Layout from "./Layout"
+
+import eventListenerImage from "./images/reactive/eventlistener.png";
+
+export const theme = nightOwl
+export const themesCode = [nightOwl, github]
+
+
+
+<Split>
+
+# eventlooooooop
+
+<img src="https://media.giphy.com/media/13dZpchxFzWjfi/giphy-downsized.gif"/>
+
+</Split>
+
+
+---
+
+<Layout>
+
+The Event Loop è uno dei piu importanti aspetti di javascript
+
+</Layout>
+
+---
+
+<img src="https://i.imgur.com/rnQEY7o.png" />
+
+---
+
+<Layout>
+
+Il codice javascript gira su un singolo thread
+
+Questo vuol dire che 
+
+# Esegue un operazione per volta
+
+</Layout>
+
+
+---
+
+<Layout>
+
+🚨 L'unica attenzione necessaria quando si scrive codice javascript è che:
+
+# Non si deve bloccare quel maledetto thread 
+
+
+- synchronous network calls 
+- infinite loops.
+
+</Layout>
+
+---
+
+<img src="https://media.giphy.com/media/eZ2fk4Z0bKWQ0/giphy-downsized.gif"/>
+
+---
+
+<Layout>
+
+Solitamente nei browser ogni tab ha un suo eventloop, <br />questo permette di isolare le pagine e non permettere a una di inficiare sulle prestazioni dell'altra.
+
+I webworker per esempio hanno il loro event loop
+</Layout>
+
+---
+
+<Layout>
+
+# Blocking the event loop
+
+Ogni operazione ci mette tanto per essere eseguita blocca il loop, quindi blocca anche
+
+UI thread e il cliente 
+
+### -- non può interagire con la pagina --
+
+
+</Layout>
+
+---
+
+<Layout>
+
+In javascript, quasi tutte le primitive sono non bloccanti.
+
+- network requests
+- Node.js filesystem operations
+
+Questo è il motivo percui in javascript dobbiamo usare spesso le callback
+
+</Layout>
+
+---
+
+<img src="https://miro.medium.com/max/1400/1*Co0gr64Uo5kSg89ukFD2dw.jpeg" />
+
+---
+
+<Layout>
+
+# The callback hell
+
+Una webapp ha solitamente decine di ajax call nelle sue pagine
+
+il mondo in cui scegliamo di gestire i processi asincroni puo' fare la differenza di sostenibiltà della nostra app
+
+https://www.gitbar.it/episodes/ep21-programmazione-asincrona-react-php-
+
+</Layout>
+
+---
+
+<Layout>
+
+- Callback Hell (“The Pyramid of Doom”)
+- JavaScript Promises
+- Async/Await
+
+</Layout>
+
+---
+
+<Layout>
+
+# Soluzione old style
+
+sincronizzare le chiamate attraverso callback annidate. 
+
+- Decente per semplici tasks, 
+- Non scala 💥
+
+</Layout>
+
+---
+
+<CodeSurfer>
+
+```js 3[44:53]
+
+const verifyUser = function(username, password, callback){
+   dataBase.verifyUser(username, password, <callback>)
+};
+
+```
+
+```js 7[40:49]
+
+const verifyUser = function(username, password, callback){
+   dataBase.verifyUser(username, password, (error, userInfo) => {
+       if (error) {
+           callback(error)
+       }else{
+           dataBase.getRoles(username, <callback>)
+       }
+   })
+};
+
+```
+
+```js 11[49:58]
+
+const verifyUser = function(username, password, callback){
+   dataBase.verifyUser(username, password, (error, userInfo) => {
+       if (error) {
+           callback(error)
+       }else{
+           dataBase.getRoles(username, (error, roles) => {
+               if (error){
+                   callback(error)
+               }else {
+                   dataBase.logAccess(username, <callback>)
+               }
+           })
+       }
+   })
+};
+
+```
+
+```js
+
+const verifyUser = function(username, password, callback){
+   dataBase.verifyUser(username, password, (error, userInfo) => {
+       if (error) {
+           callback(error)
+       }else{
+           dataBase.getRoles(username, (error, roles) => {
+               if (error){
+                   callback(error)
+               }else {
+                   dataBase.logAccess(username, (error) => {
+                       if (error){
+                           callback(error);
+                       }else{
+                           callback(null, userInfo, roles);
+                       }
+                   })
+               }
+           })
+       }
+   })
+};
+
+```
+</CodeSurfer>
+
+---
+
+<Layout>
+
+Ogni funzione prende come argomento un altra funzione che è chiamata con un parametro che è la risposta della precedente funzione.
+
+http://callbackhell.com/
+
+</Layout>
+
+---
+
+<Layout>
+
+# Esempio pratico
+
+Orreniamo tutti i **post** di un **utente** partendo da un **task** a lui assegnati
+
+TASK ➡️ USER ➡️ POST
+
+</Layout>
+
+---
+
+<CodeSurfer>
+
+```js 2:16
+
+function getTodos(onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getUser(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  request.open("GET", "https://jsonplaceholder.typicode.com/todos");
+  request.send();
+}
+
+function getUser(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getPosts(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  // we set the request method, the url for the request
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/users/${data[0].userId}`
+  );
+  // and send it off to the aether
+  request.send();
+}
+
+function getPosts(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    onSuccess(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  // we set the request method, the url for the request
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/posts?userId=${data.id}`
+  );
+  // and send it off to the aether
+  request.send();
+}
+
+getTodos(data => console.log(data), data => console.log("err", data));
+
+```
+
+```js 18:36
+
+function getTodos(onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getUser(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  request.open("GET", "https://jsonplaceholder.typicode.com/todos");
+  request.send();
+}
+
+function getUser(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getPosts(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/users/${data[0].userId}`
+  );
+  request.send();
+}
+
+function getPosts(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    onSuccess(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  // we set the request method, the url for the request
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/posts?userId=${data.id}`
+  );
+  // and send it off to the aether
+  request.send();
+}
+
+getTodos(data => console.log(data), data => console.log("err", data));
+
+```
+
+```js 36:62
+
+function getTodos(onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getUser(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  request.open("GET", "https://jsonplaceholder.typicode.com/todos");
+  request.send();
+}
+
+function getUser(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getPosts(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/users/${data[0].userId}`
+  );
+  request.send();
+}
+
+function getPosts(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    onSuccess(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/posts?userId=${data.id}`
+  );
+  request.send();
+}
+
+getTodos(data => console.log(data), data => console.log("err", data));
+
+```
+</CodeSurfer>
+
+
+---
+
+<Layout>
+
+Per semplificare il nostro codice e renderlo più leggibile, 
+
+riducendo le linee di codice e quindi limitando l'insorgere di bug 🐛
+
+</Layout>
+
+---
+
+<Split>
+
+# Le promise 
+
+<img src="https://us.123rf.com/450wm/wannawit/wannawit1711/wannawit171100023/90259934-stock-vector-pinky-swear-outline-icon.jpg?ver=6" />
+
+</Split>
+
+---
+
+<Layout>
+
+# Una Promise rappresenta un'operazione che non è ancora completata, ma lo sarà in futuro.
+
+    new Promise(function(resolve, reject) { ... });
+
+
+</Layout>
+
+---
+
+<Layout>
+
+# Gli stati di una promise
+
+Una promessa di un valore che verrà restituito nel futuro, promessa che può avere 3 stati.
+
+- resolved
+- rejected
+- pending
+
+</Layout>
+
+---
+
+<Layout>
+
+# resolved (risolta)	
+
+Una promise è risolta quando il 
+
+**valore che rappresenta diviene disponibile**, 
+
+cioè quando l’attività asincrona restituisce un valore
+
+</Layout>
+
+---
+
+<Layout>
+
+# rejected (rigettata)		
+
+Una promise è rigettata quando l’attività asincrona associata 
+
+**non restituisce un valore** 
+
+o perché si è **verificata un’eccezione**
+
+oppure perché il valore restituito **non è considerato valido**
+
+</Layout>
+
+---
+
+<Layout>
+
+# pending (pendente)
+
+La richiesta di esecuzione di un’attività asincrona 
+
+**è partita ma non abbiamo ancora ricevuto un risultato**
+
+</Layout>
+
+---
+
+<Layout>
+
+    var promise = new Promise(function(resolve, reject) {
+        if (condizione) {
+            resolve(valore);
+        } else {
+            reject(motivo);
+        }
+    });
+</Layout>
+
+---
+
+<Layout>
+
+# Consumare una promise
+
+</Layout>
+
+---
+
+<img style={{'background-color': 'white'}} src="https://cdn.ednsquare.com/s/*/f8730e87-bf30-4e28-8728-b23c80567ee6.png" />
+
+---
+
+<Layout>
+
+## Then, utilizzare le promise
+
+    var myPromise = httpGet("/utente/123");
+
+    myPromise.then(
+        function(utente) {
+            console.log("Il server ha restituito l'utente " + utente.nome);
+        }
+    );
+
+</Layout>
+
+---
+
+<Layout>
+
+## catch(), catturare i fallimenti
+
+In questo modo se per un qualsiasi motivo la promise dovesse essere rigettata verrà chiamata la funzione dentro catch()
+
+    var myPromise = httpGet("/utente/123");
+
+    myPromise.catch((err) => {
+        console.log(err)
+    });
+
+</Layout>
+
+---
+
+<img style={{'background-color': 'white'}} src="https://bitsofco.de/content/images/2016/07/Chaining-Copy-1.png" />
+
+---
+
+<Layout>
+
+## Concatenare le promises
+
+Spesso si rischia di entrare in un hell anche con le promise
+
+    httpGet("/utente/123")
+    .then(function(utente) {
+        httpGet("/blog/" + utente.blogId)
+        .then(function(blog) {
+            displayPostList(blog.posts);
+        });
+    });
+
+</Layout>
+
+---
+
+<Layout>
+
+## Per oviare il problema...
+
+
+    function getUtente() {
+        return httpGet("/utente/123");
+    }
+
+    function getBlog(utente) {
+        return httpGet("/blog/" + utente.blogId);
+    }
+
+    function displayBlog(blog) {
+        displayPostList(blog.posts);
+    }
+
+    getUtente()
+        .then(getBlog)
+        .then(displayBlog);
+
+
+</Layout>
+
+---
+
+# rifattorizziamo la funzione di richiesta sulla rete 
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js title="Callback"
+function getTodos(onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getTodo(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  // we set the request method, the url for the request
+  request.open("GET", "https://jsonplaceholder.typicode.com/todos");
+  // and send it off to the aether
+  request.send();
+}
+
+function getTodo(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    getPosts(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  // we set the request method, the url for the request
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/users/${data[0].userId}`
+  );
+  // and send it off to the aether
+  request.send();
+}
+
+function getPosts(data, onSuccess, onError) {
+  let request = new XMLHttpRequest();
+  request.responseType = "json";
+
+  request.addEventListener("load", () => {
+    onSuccess(request.response, onSuccess, onError);
+  });
+
+  request.addEventListener("error", e => {
+    onError(e);
+  });
+
+  // we set the request method, the url for the request
+  request.open(
+    "GET",
+    `https://jsonplaceholder.typicode.com/posts?userId=${data.id}`
+  );
+  // and send it off to the aether
+  request.send();
+}
+
+getTodos(data => console.log(data), data => console.log("err", data));
+
+````
+
+```js title="Promises"
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+function getTodos() {
+  return netRequest("https://jsonplaceholder.typicode.com/todos");
+}
+
+function getUser(todolist) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+}
+
+function getPosts(user) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+}
+
+//With promises
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+````
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurfer theme={github}>
+
+```js 1:12 title="mi creo una funzione per generare la promise"
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+function getTodos() {
+  return netRequest("https://jsonplaceholder.typicode.com/todos");
+}
+
+function getUser(todolist) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+}
+
+function getPosts(user) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+}
+
+//With promises
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+}
+
+```
+
+
+
+```js 12:27 title="creo delle funzioni helper per le varie chiamate"
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+function getTodos() {
+  return netRequest("https://jsonplaceholder.typicode.com/todos");
+}
+
+function getUser(todolist) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+}
+
+function getPosts(user) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+}
+
+//With promises
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+}
+
+```
+
+```js 29:35 title="Ecco il flow delle promises"
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+function getTodos() {
+  return netRequest("https://jsonplaceholder.typicode.com/todos");
+}
+
+function getUser(todolist) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+}
+
+function getPosts(user) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+}
+
+//With promises
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+}
+
+```
+
+```js 2
+getTodos()
+  .then(getUser) 
+  // Prendo il primo todo e genero la prossima 
+  // promise che deve essere risolta
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+}
+```
+
+```js 3
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  // Risolvo la promise dell'utente e genero una 
+  // promise per i post
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+}
+```
+
+```js 4
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  // Risolvo la promise e stampo a console i post 
+  .catch(e => console.log("error", e));
+}
+```
+
+```js 5
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+   //  Catturo eventuali errori 
+}
+```
+
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```js 
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+function getTodos() {
+  return netRequest("https://jsonplaceholder.typicode.com/todos");
+}
+
+function getUser(todolist) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+}
+
+function getPosts(user) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+}
+
+//With promises
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Promises chaining
+
+</Layout>
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step title="Promise piping">
+
+<img style={{width: '300px'}} src="data:image/png;base64,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" />
+
+```js
+
+new Promise(function(resolve, reject) {
+  setTimeout(() => resolve(10), 1000);
+}).then(function(result) { 
+  return result * 2;
+}).then(function(result) { 
+  return result * 2;
+}).then(function(result) {
+  return result * 2;
+});
+
+````
+
+</Step>
+
+<Step title="Parallel promise">
+
+<img style={{width: '500px'}} src="data:image/png;base64,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" />
+
+```js 1:17 
+
+let promise = new Promise(function(resolve, reject) {
+  setTimeout(() => resolve(10), 1000);
+});
+
+promise.then(function(result) {
+  return result * 2;
+});
+
+promise.then(function(result) {
+  return result * 2;
+});
+
+promise.then(function(result) {
+  return result * 2;
+});
+
+````
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<Layout>
+
+# Promise API
+
+</Layout>
+
+---
+
+<Layout>
+
+# Promise.all
+
+Vogliamo che le promises vengano eseguite in parallelo e noi attendiamo che queste finiscano
+
+
+</Layout>
+
+---
+
+<CodeSurfer>
+
+```js 
+
+let promise = Promise.all([...promises...]);
+
+```
+
+```js title="restituisce un alert con 1, 2, 3 dopo 3 secondi" subtitle="L'ordine del risultato segue l'ordine delle promise e non il tempo di timeout"
+
+Promise.all([
+  new Promise(resolve => setTimeout(() => resolve(1), 3000)), // 1
+  new Promise(resolve => setTimeout(() => resolve(2), 2000)), // 2
+  new Promise(resolve => setTimeout(() => resolve(3), 1000))  // 3
+]).then(alert);  
+
+
+```
+
+
+```js title="Caso reale" subtitle="Se una sola promise viene rigettata, tutte vengono rifiutate "
+
+let names = ["iliakan", "remy", "jeresig"];
+
+let requests = names.map(name => fetch(`https://api.github.com/users/${name}`));
+
+Promise.all(requests)
+  .then(responses => {
+    // all responses are resolved successfully
+    for (let response of responses) {
+      alert(`${response.url}: ${response.status}`); // shows 200 for every url
+    }
+
+    return responses;
+  })
+  // map array of responses into an array of response.json() to read their content
+  .then(responses => Promise.all(responses.map(r => r.json())))
+  // all JSON answers are parsed: "users" is the array of them
+  .then(users => users.forEach(user => alert(user.name)));
+
+
+```
+
+</CodeSurfer>
+
+
+---
+
+<Layout>
+
+# Promise.allSettled
+
+Attendiamo che le promise vengano consumate ma non ci curiamo del fatto che falliscano o abbiano successo
+
+</Layout>
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js title="chiamate"
+
+let urls = [
+  'https://api.github.com/users/iliakan',
+  'https://api.github.com/users/remy',
+  'https://no-such-url'
+];
+
+Promise.allSettled(urls.map(url => fetch(url)))
+  .then(results => { // (*)
+    results.forEach((result, num) => {
+      if (result.status == "fulfilled") {
+        alert(`${urls[num]}: ${result.value.status}`);
+      }
+      if (result.status == "rejected") {
+        alert(`${urls[num]}: ${result.reason}`);
+      }
+    });
+  });
+
+````
+
+```js title="risultato"
+
+[
+  {status: 'fulfilled', value: ...response...},
+  {status: 'fulfilled', value: ...response...},
+  {status: 'rejected', reason: ...error object...}
+]
+  
+````
+
+</Step>
+
+</CodeSurferColumns>
+
+
+---
+
+<Split>
+
+<img src="https://media.giphy.com/media/6Z3D5t31ZdoNW/200w_d.gif" />
+
+# Promise.race
+
+Similare a Promise.all, <br /> ma attende che la prima promise sia settled <br />  e restituisce il risultato o l'errore.
+
+
+
+</Split>
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js
+
+let promise = Promise.race(iterable);
+
+```
+
+```js title="restituisce 1"
+Promise.race([
+  new Promise((resolve, reject) => setTimeout(() => resolve(1), 1000)),
+  new Promise((resolve, reject) => setTimeout(() => reject(new Error("Whoops!")), 2000)),
+  new Promise((resolve, reject) => setTimeout(() => resolve(3), 3000))
+]).then(alert); // 1
+```
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+# Async Await
+
+---
+
+<CodeSurfer>
+
+```js
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+function getTodos() {
+  return netRequest("https://jsonplaceholder.typicode.com/todos");
+}
+
+function getUser(todolist) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+}
+
+function getPosts(user) {
+  return netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+}
+
+//With promises
+getTodos()
+  .then(getUser)
+  .then(getPosts)
+  .then(data => console.log("promise", data))
+  .catch(e => console.log("error", e));
+}
+
+```
+
+```js 1:24 title="risolto con async / await" subtitle="ci permette di trattare gli elementi asincroni come se fossero sincroni"
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+async function f() {
+  let todolist = await netRequest("https://jsonplaceholder.typicode.com/todos");
+  let user = await netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+  let posts = await netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+  console.log("await todos: ", posts);
+}
+
+f();
+
+```
+
+
+```js 1:24 title="Fissazioni 😉"
+
+function netRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.responseType = "json";
+    request.addEventListener("load", () => resolve(request.response));
+    request.addEventListener("error", e => reject({ e, call: url }));
+    request.open("GET", url);
+    request.send();
+  });
+}
+
+(async function f() {
+  let todolist = await netRequest("https://jsonplaceholder.typicode.com/todos");
+  let user = await netRequest(
+    `https://jsonplaceholder.typicode.com/users/${todolist[0].userId}`
+  );
+  let posts = await netRequest(
+    `https://jsonplaceholder.typicode.com/posts?userId=${user.id}`
+  );
+  console.log("await todos: ", posts);
+})();
+
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Proactive vs Reactive programming
+
+</Layout>
+
+---
+
+<Layout>
+
+<img style={{width: '400px'}} src="https://cycle.js.org/img/passive-foo-bar.svg" />
+
+</Layout>
+
+---
+
+<Layout>
+
+<img style={{width: '400px'}} src="https://cycle.js.org/img/reactive-foo-bar.svg" />
+
+</Layout>
+
+---
+
+
+
+<Layout>
+
+Un esempio di reactive programming
+
+</Layout>
+
+---
+
+
+<Layout>
+
+<img src="https://www.editions-eni.fr/Open/download/369a9c20-bc45-4f1e-9d50-0af162bf69c2/images/xlCOR-IE-01.png" />
+
+</Layout>
+
+---
+<Layout>
+
+Reactive programming è un paradigma di programmazione dichiarativa
+riguardante data streams e la propagazione del cambiamento. 
+
+
+
+
+</Layout>
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+Nel mondo della programmazione imperativa<br />
+durante l'esecuzione <br />
+il valore di a$ sarà sempre 30<br/>
+anche dopo che ho aggiornato b e c
+
+
+```js
+
+    b = 10, c = 20;
+    a$ = b+c;
+    b = 20, c = 30;
+    a$ == ?   //30
+
+```
+
+</Step>
+
+<Step>
+
+Nel caso della programmazione reattiva<br />
+il valore di a$ sarà 50
+
+
+```js 1:6
+
+    b = 10, c = 20;
+    a$ = b+c;
+    b = 20, c = 30;
+    a$ == ?   //50
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<Layout>
+
+Nella programmazione reattiva il valore di a$ si aggiorna automaticamente al cambiare di b e c.
+
+Durante il cambiamento di b e c, a verrà notificata e eseguirà nuovamente il calcolo
+
+</Layout>
+
+
+---
+
+# Programmazione reattiva con rxjs
+
+---
+
+<img style={{width: '300px'}} src="https://aymen.co/wp-content/uploads/2017/01/reactive-js-thmb-1.jpg" />
+
+---
+
+<Layout>
+
+<img style={{width: '300px'}} src="https://media.giphy.com/media/n9soCicUSo0P6/giphy.gif" />
+
+</Layout>
+
+---
+
+<Layout>
+
+RxJs è una libreria per trasformare, comporre e ricercare <br />
+all'interno di Stream asincroni di dati. 
+
+Usabile sul browser e da nodejs
+
+</Layout>
+
+---
+
+<Layout>
+
+Il vero carico cognitivo è dato dal **pensare in modo reattivo**
+
+Un modo per descriverlo è
+
+> _Think of RxJS as “LoDash” for handling asynchronous events_.
+
+</Layout>
+
+---
+
+<Layout>
+
+<img style={{width: '600px'}} src="https://res.cloudinary.com/practicaldev/image/fetch/s--2N_OhV_b--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://thepracticaldev.s3.amazonaws.com/i/pgszjn5110pixunu5uw4.jpg" />
+
+</Layout>
+
+---
+
+<Layout>
+
+I concetti della programmazione reattiva sono:
+
+- Observable 
+- Observer
+- Subscription
+- Operator
+- Subject
+- Push & pull protocol
+
+</Layout>
+
+---
+
+
+
+<Layout>
+
+<SplitRight>
+
+<img src="https://www.sommelierwinebox.com/wp-content/uploads/2020/03/Wine-Club.png" />
+
+# Winebox
+
+Ogni mese ti inviano a casa tre bottiglie con un tema enologico
+
+
+</SplitRight>
+
+</Layout>
+
+---
+
+
+
+<Layout>
+
+<SplitRight>
+
+<img src="https://media.giphy.com/media/11VKF3OwuGHzNe/200w_d.gif" />
+
+# Observable
+
+Un Observable è **winebox**, infatti un observable non è altro 
+che uno stram di dati separati nel tempo.
+
+"I dati sono il nostro pacco con 3 bottiglie che riceviamo mensilmente"
+
+
+
+</SplitRight>
+
+</Layout>
+
+---
+
+<Layout>
+
+<Split>
+
+<img src="https://media.giphy.com/media/iS6wZYrJmyEko/giphy-downsized.gif" />
+
+# Observer
+
+Colui che riceve i pacchetti prodotti dall'observable.
+
+L'observer sono io che ho fatto l'abbonamento al servizio e aspetto con ansia il pacco di vino.
+
+</Split>
+
+</Layout>
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+<div>
+
+Questo blocco di codice rappresenta il nostro observable<br />
+Nel nostro caso winebox
+
+</div>
+
+
+```js
+
+const vini = [...]
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${12 - mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+```
+
+
+</Step>
+
+
+
+<Step>
+
+<div>
+
+Creo il mio observable
+
+</div>
+
+
+```js 4
+
+const vini = [...]
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${12 - mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+```
+
+
+</Step>
+
+<Step>
+
+<div>
+
+Imposto alcune costanti
+
+</div>
+
+
+```js 5:6 
+
+const vini = [...]
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${12 - mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+```
+
+
+</Step>
+
+<Step>
+
+<div>
+
+Se l'abbonamento è concluso 
+
+notifico l'observer con il metodo `complete()`
+
+</div>
+
+
+```js 9:11
+
+const vini = [...]
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${12 - mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+```
+
+
+</Step>
+
+<Step>
+
+<div>
+
+Se l'abbonamento è in corso scalo una mensilità e notifico l'obeserver (l'abbonato al servizio) con una nuova cassetta di vini
+
+</div>
+
+
+```js 12:19
+
+const vini = [...]
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${12 - mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+
+---
+
+<Layout>
+
+<Split>
+
+<img src="https://media.giphy.com/media/KYDNVtUXjJ5mABjKEQ/giphy.gif" />
+
+Abbiamo definito il comportamente del nostro `observable` 
+ma fino ad ora non abbiamo nessun "abbonato" (observer).
+
+Per avere un abbonato è necessario realizzare una **Subscription**
+
+</Split>
+</Layout>
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+
+<div style={{padding: '12px'}}>
+Sottoscrivo l'abbonameno passando appunto l'observer.
+
+L'observer sono io che mi sto abbonando e qui definirò il mio comportamento
+
+</div>
+
+```js
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+```
+
+</Step>
+
+<Step>
+
+
+<div style={{padding: '12px'}}>
+    <img src="https://media.giphy.com/media/E3L5goMMSoAAo/200w_d.gif" />
+</div>
+
+```js 3
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+```
+
+</Step>
+
+<Step>
+
+
+<div style={{padding: '12px'}}>
+    <img src="https://media.giphy.com/media/AqpK7kiHuXApW/giphy.gif" />
+</div>
+
+```js 4
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+```
+
+</Step>
+
+<Step>
+
+
+<div style={{padding: '12px'}}>
+    <img src="https://media.giphy.com/media/f4bHxguAxRc1mUMfxj/giphy-downsized.gif" />
+</div>
+
+```js 5
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+```
+
+</Step>
+</CodeSurferColumns>
+
+
+
+---
+
+<Layout>
+
+Possiamo disiscriverxi in modo molto semplice, 
+abbiamo salvato la subscription su una variabile quindi chiamiamo 
+
+    subscription.unsubscribe();
+
+</Layout>
+
+---
+
+<Layout>
+
+# Observable
+
+La classe `Observable` ha diversi metodi per la creazione, noi abbiamo usato Rx.Observable.create ma 
+abbiamo metodi per creare observable a partire da:
+
+- different kind of data/streams such as events
+- event patterns
+- arrays
+- promises
+- data structure/primitive
+- single/multiple values
+
+E' infatti una libreria infinita!
+
+</Layout>
+
+---
+
+<Layout>
+
+Rifattorizziamo il nostro Observable per renderlo piu Snello
+
+</Layout>
+
+---
+
+
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js title="modalità viking / procedural"
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+
+
+```js  title="modalità functional"
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+<Step>
+
+```js title="modalità viking / procedural"
+
+Importo le librerie necessarie per generare un timer, 
+per prendere un numero limitato di elementi e per mappare 
+ogni elemento dello stream con un valore
+ 
+```
+
+```js 1:3
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+
+<Step title="Preparo il messaggio">
+
+```js  12:16
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+
+
+```js  4:9
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+<Step title="Gestisco il tempo">
+
+```js  4,6,8,18
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+
+
+```js  11
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+
+<Step title="Gestisco lo scadere dei 12 mesi">
+
+```js  6,9:10,17
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+
+
+```js  12
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+<Step title="Mappiamo il risultato">
+
+```js  12:16
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+
+
+```js  13
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+<Step title="Subscribing">
+
+```js  21:25
+
+const observable = Observable.create(function(observer) {
+  let mesi = 12;
+  const cadenza = 1000; //cadenza 1 secondo
+
+  const intervalId = setInterval(() => {
+    if (mesi < 1) {
+      clearInterval(intervalId);
+      observer.complete();
+    } else {
+      mesi--;
+      observer.next(
+        `📦 Il vino per il ${mesi} è ${
+          vini[Math.round(Math.random() * vini.length)]
+        }`
+      );
+    }
+  }, cadenza);
+});
+
+const subscription = observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+
+
+```js  15:19
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<Layout>
+
+<Split>
+
+<img src="https://media.giphy.com/media/9DgxhWOxHDHtF8bvwl/giphy-downsized.gif" />
+
+# Operators
+
+Gli operatori possono essere visti come gli operai che maneggiano il pacco prima che ti arrivi, possono perderlo, decidere di non portarlo portarti sono i primi 12 ecc.
+
+Gli operatori sono tantissimi e agiscono in ambiti molto diversi come
+
+https://rxmarbles.com/
+
+</Split>
+
+</Layout>
+
+---
+
+<Split>
+
+<img src="https://media.giphy.com/media/VzQ9PUdifClRm/giphy.gif" />
+
+# Abbonamento famiglia
+
+Immagina di voler attivare un abbonamento famiglia, con una sola sottoscrizione 
+winebox invia un pacco a te, a tuo fratello e a tua sorella.
+
+</Split>
+
+---
+
+<CodeSurfer>
+
+```js
+
+import { timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+observable.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`),
+  error: err => console.error("something wrong occurred: " + err),
+  complete: () => console.log("📭 abbonamento terminato")
+});
+
+```
+
+```js
+
+import { Subject, from, timer } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+const randWine = mesi => {
+  return `📦 Il vino per il ${mesi} è ${
+    vini[Math.round(Math.random() * (vini.length - 1))]
+  }`;
+};
+
+const observable = timer(1000, 1000)
+  .pipe(take(12))
+  .pipe(map(randWine));
+
+
+const subject = new Subject();
+subject.subscribe({
+  next: x => console.log(`${x} e io me lo bevo 🍷`)
+});
+subject.subscribe({
+  next: x => console.log(`${x} e Mario se la beve 🍷`)
+});
+subject.subscribe({
+  next: x => console.log(`${x} e Lucia se la beve 🍷`)
+});
+
+observable.subscribe(subject);
+
+
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+<Split>
+
+<img src="https://www.winelite.it/wp-content/uploads/2016/03/BEVIRESPONSABILMENTE.png" />
+
+Dopo questa presentazione potresti non avere gli stessi riflessi ed essere meno il
+
+#REATTIVO 😉
+
+</Split>
+
+</Layout>

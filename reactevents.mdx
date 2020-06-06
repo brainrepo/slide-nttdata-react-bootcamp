@@ -1,0 +1,367 @@
+import { themes } from 'mdx-deck'
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer";
+import { nightOwl, github } from "@code-surfer/themes";
+import { Split, SplitRight} from 'mdx-deck'
+
+import Layout from "./Layout"
+
+import eventListenerImage from "./images/reactive/eventlistener.png";
+
+export const theme = nightOwl
+export const themesCode = [nightOwl, github]
+
+
+
+
+
+
+
+
+<Layout>
+
+# React
+
+## Gestione degli Eventi
+
+
+La gestione degli eventi negli elementi React è molto simile alla gestione degli eventi negli elementi DOM. Vi sono alcune differenze sintattiche:
+
+- eventi  dichiarati utilizzando camelCase, anziché in minuscolo.
+- in JSX, il gestore di eventi (event handler) passato come funzione, non come stringa.
+
+</Layout>
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Layout>
+
+
+<CodeSurferColumns  themes={themesCode}>
+
+<Step>
+
+
+
+```html
+
+<!-- HTML -->
+
+<button onclick="attivaLasers()">
+  Attiva Lasers
+</button>
+
+```
+
+```html
+
+<!-- REACT -->
+
+<button onClick={attivaLasers}>
+  Attiva Lasers
+</button>
+
+```
+
+</Step>
+
+<Step>
+
+```html
+Un’altra differenza è che, in React, 
+non è possibile ritornare false 
+per impedire il comportamento predefinito.
+
+ Devi chiamare preventDefault 
+esplicitamente. Ad esempio, in un semplice 
+codice HTML per impedire 
+il comportamento predefinito del link di
+ aprire una nuova pagina, 
+potresti scrivere:
+
+```
+
+```js
+
+//HTML
+
+<a href="#" 
+onclick="console.log('Hai cliccato sul link.'); 
+          return false">
+  Clicca qui
+</a>
+
+
+//REACT
+
+function ActionLink() {
+  function handleClick(e) {
+    e.preventDefault();
+    console.log('Hai cliccato sul link.');
+  }
+
+  return (
+    <a href="#" onClick={handleClick}>
+      Clicca qui
+    </a>
+  );
+}
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+
+</Layout>
+
+
+---
+
+<Layout>
+
+# Il parametro e è un evento sintetico (synthetic event)
+
+Un contenitore cross-browser intorno all’evento nativo del browser.
+
+- interfaccia uguale all'evento nativo compresi stopPropagation() e preventDefault()
+- ma gli eventi funzionano in modo identico in tutti i browser
+
+
+</Layout>
+
+---
+
+<Split>
+
+<img style={{width: "300px"}} src="data:image/jpeg;base64,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" />
+
+https://it.reactjs.org/docs/events.html
+
+</Split>
+
+---
+
+<Layout>
+
+Se constati di avere bisogno dell’evento del browser sottostante per qualche motivo, puoi ottenerlo semplicemente usando 
+
+l’attributo nativeEvent. 
+
+</Layout>
+
+---
+
+<Layout>
+
+# Pooling degli Eventi
+
+SyntheticEvent è pooled, ovvero “accomunato”.
+
+Callback invocata -> evento reinizializzato per essere riusato
+
+per migliorare le prestazioni
+
+on puoi avere accesso all’evento in modo asincrono
+
+</Layout>
+
+---
+
+
+
+<Layout>
+
+# Pooling degli Eventi
+
+SyntheticEvent è pooled, ovvero “accomunato”.
+
+Callback invocata -> evento reinizializzato per essere riusato
+
+per migliorare le prestazioni
+
+on puoi avere accesso all’evento in modo asincrono
+
+</Layout>
+
+---
+
+<CodeSurfer>
+
+```js 
+function onClick(event) {
+  console.log(event); // => oggetto nullifficato.
+  console.log(event.type); // => "click"
+  const eventType = event.type; // => "click"
+
+  setTimeout(function() {
+    console.log(event.type); // => null
+    console.log(eventType); // => "click"
+  }, 0);
+
+}
+```
+
+</CodeSurfer>
+
+---
+
+https://it.reactjs.org/docs/events.html
+
+---
+
+Usando React non hai bisogno chiamare 
+
+## addEventListener
+(quasi sempre)
+https://github.com/ahiipsa/navigation
+
+basta fornire un listener quando l’elemento è inizialmente renderizzato
+
+---
+
+<CodeSurfer>
+
+```js 
+class Interruttore extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {acceso: true};
+
+    // Necessario per accedere al corretto valore di `this` all'interno della callback
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    this.setState(state => ({
+      acceso: !state.acceso
+    }));
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}> 
+      <!-- Il metodo handleclick viene stappato dal contesto -->
+        {this.state.acceso ? 'Acceso' : 'Spento'}
+      </button>
+    );
+  }
+}
+
+ReactDOM.render(
+  <Interruttore />,
+  document.getElementById('root')
+);
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Binding 
+
+Fai attenzione al valore di this nelle callback JSX.
+
+i metodi delle classi non sono associati (bound) di default.
+
+Se dimentichi di applicare bind a this.handleClick e di passarlo a onClick, this sarà undefined quando la funzione verrà effettivamente chiamata.
+
+https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/
+
+</Layout>
+
+---
+
+Per oviare al problema 
+
+---
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js
+
+class LoggingButton extends React.Component {
+  // Garantisce che `this` si riferisca all'oggetto originale 
+  // all'interno di handleClick.
+  // Attenzione: questa è sintassi *sperimentale*.
+  handleClick = () => {
+    console.log('Il valore di `this` è: ', this);
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>
+        Clicca qui
+      </button>
+    );
+  }
+}
+
+```
+
+
+```js
+
+class LoggingButton extends React.Component {
+  handleClick() {
+    console.log('Il valore di `this` è: ', this);
+  }
+
+  render() {
+    // Questa sintassi garantisce che `this` sia associato 
+    //correttamente all'interno di handleClick
+    return (
+      <button onClick={() => this.handleClick()}> 
+
+      <!-- Qui c'è una chiamata dentro una arrow function
+       che inietta il contesto -->
+
+        Clicca qui
+      </button>
+    );
+  }
+}
+
+// 🤯 Viene creata una nuova callback a ogni rendering
+
+```
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<Layout>
+
+All’interno di un ciclo, è comune avere 
+
+**l’esigenza di passare un parametro aggiuntivo** ad un gestore di eventi. 
+
+Ad esempio, avendo id come l’identificativo della riga, 
+le seguenti dichiarazioni sarebbero entrambe valide: 
+
+    <button onClick={(e) => this.deleteRow(id, e)}>Elimina riga</button>
+    <button onClick={this.deleteRow.bind(this, id)}>Elimina riga</button>
+
+</Layout>
+
+---
+

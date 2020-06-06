@@ -1,0 +1,263 @@
+import { themes } from 'mdx-deck'
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer";
+import { nightOwl, github } from "@code-surfer/themes";
+import { Split, SplitRight} from 'mdx-deck'
+import Layout from './Layout'
+
+export const theme = nightOwl
+export const themesCode = [nightOwl, github]
+
+
+
+<Split>
+
+<img alt="me" src="http://www.gitbar.it/static/151751c7a7795ca87f026014fc95f835/2a4de/me.png" />
+
+
+## whoami  Mauro Murru
+
+ 💻 Senior Full Stack Developer
+
+ 🎙Podcaster - host of Gitbar.it
+
+ 🛩 Digital nomad - Lyon 🇫🇷 Olbia 🇮🇹
+
+
+</Split>
+
+---
+
+<Layout>
+
+
+# AJAX, fetch, and Axios
+### Asynchronous JavaScript?
+
+</Layout>
+
+---
+
+<Layout>
+
+
+# HTTP Requests in the Browser
+
+- URL bar
+- Links
+- JavaScript
+- window.location.href = 'http://www.google.com'
+- Submitting forms (GET/POST)
+
+Questi sono gli strumenti che il browser ci mette a disposizione per navigare tra i documenti
+
+</Layout>
+
+---
+
+<Layout>
+
+
+# HTTP Requests in the Browser
+
+- spesso per ogni azione viene servita una pagina html
+- il browser quindi refresha tutto il contenuto della pagina caricando il "contenuto fresco"
+- ogni pagina avra quindi nuovi fogli di stile scripts e file
+
+</Layout>
+
+---
+
+<Layout>
+    <img src="https://ss-pics.s3.eu-west-1.amazonaws.com/files/935166/page-1_99we.jpg?1568799996" />
+</Layout>   
+
+---
+
+<Layout>
+
+Axios è una popolare libreria per fare http requests che gira sia nei browser che su nodejs.
+
+</Layout>
+
+---
+
+<Layout>
+
+E' una libreria basata sulle *promise* e permette la scrittura di codice async/await per fare chiamate XHR in modo faciler
+
+</Layout>
+
+---
+
+<Layout>
+
+Esiste anche una libreria nativa chiamata Fetch API ma axios ci mette a disposizione alcuni vantaggi://
+
+- supportata da vecchi browsers (Fetch needs a polyfill)
+
+- permette "l'uccisione" delle richieste
+
+- permette di settare un timeout
+
+- ha la protezione csrf builtin
+
+- supporta l'upload progress 
+
+- trasforma la risosta in json automaticamente
+
+- ha il catch per l'errore
+
+- gira anche su node
+
+</Layout>
+
+---
+
+<Split>
+
+## Una sorta di supereroe
+
+<img src="https://media.giphy.com/media/3Gij38skUDBvy/giphy.gif" />
+
+</Split>
+
+---
+
+# Installazione 
+
+Axion è distribuita sottoforma di pacchetto npm 
+
+    npm install axios
+
+ma lo si puo richiamare direttamente nelle pagine usando la cdn di unpkg.com/
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+---
+
+# The Axios API
+
+Puoi fare una http request usando direttamente l'oggetto axios.com
+
+```js
+axios({
+  url: 'https://dog.ceo/api/breeds/list/all',
+  method: 'get'
+})
+```
+
+---
+
+<Split>
+
+Restituisce una promise che puo' essere consumata con then / catch o con async/await
+
+<img src="https://media.giphy.com/media/GFtJhEvG3681y/giphy.gif" />
+
+</Split>
+
+---
+
+<CodeSurfer>
+
+```js
+
+(async () => {
+  const response = await axios({
+    url: 'https://dog.ceo/api/breeds/list/all',
+    method: 'get'
+  })
+
+  console.log(response)
+})()
+````
+
+
+```js
+
+
+  axios({
+    url: 'https://dog.ceo/api/breeds/list/all',
+    method: 'get'
+  })
+  .then( response => console.log("OK", response))
+  .catch( err => console.log("ERR", err))
+````
+
+</CodeSurfer>
+
+---
+
+# The Axios API
+
+Generalmente usiamo delle shortcut per i metodi più comuni
+
+    axios.get()
+    axios.post()
+
+---
+
+<CodeSurfer>
+
+```js
+
+;(async () => {
+  const response = await axios.get('https://dog.ceo/api/breeds/list/all')
+  console.log(response)
+})()
+
+````
+
+</CodeSurfer>
+
+---
+
+# Axios offre anche 
+
+- axios.delete()
+- axios.put()
+- axios.patch()
+- axios.options()
+
+---
+
+# Add parameters to GET requests
+
+Una richiesta get può contenere dei parametri nella url: 
+
+    https://site.com/?name=Brainrepo.
+
+o puoi passarli nelle opzioni
+
+    axios.get('https://site.com/', {
+        params: {
+            name: 'Brainrepo'
+        }
+    })
+
+---
+
+# POST Requests
+
+    axios.post('https://site.com/')
+
+il secondo argomento è l'oggetto che vogliamo passare nel body della post.
+
+    axios.post('https://site.com/', {
+        name: 'Flavio'
+    })
+
+---
+
+<Layout>
+
+<Split>
+
+And now **CODE TIME** 
+
+<img src="https://media.giphy.com/media/KfwyWfTwMu1FG0XhO8/giphy.gif" />
+
+</Split>
+</Layout>
+
+

@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
     "bootcamp": "mdx-deck bootcamp.mdx",
+    "axios": "mdx-deck axios.mdx",
+    "htmlevents": "mdx-deck htmlevents.mdx",
+    "eventloop": "mdx-deck eventloop.mdx",
+    "reactevents": "mdx-deck reactevents.mdx",
     "bootcamp:build": "mdx-deck build bootcamp.mdx"
   },
   "author": "",
