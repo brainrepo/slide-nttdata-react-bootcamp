@@ -1,0 +1,934 @@
+import { themes } from "mdx-deck";
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer";
+import { nightOwl, github, duotoneDark } from "@code-surfer/themes";
+import { Split, SplitRight } from "mdx-deck";
+
+import Layout from "./Layout";
+
+import eventListenerImage from "./images/reactive/eventlistener.png";
+
+export const theme = nightOwl;
+export const themesCode = [nightOwl, github, duotoneDark];
+
+
+<Layout>
+
+# JSX vs TSX
+
+</Layout>
+
+---
+
+<Layout>
+
+# JSX
+
+</Layout>
+
+---
+
+<Layout>
+
+<img src="https://i.pinimg.com/736x/c9/55/72/c95572674687950574f007d9d3c863f3.jpg" />
+
+</Layout>
+
+---
+
+<Layout>
+
+# Non c'è nulla di più sbagliato che questa affermazione 😡
+
+</Layout>
+
+---
+
+<Layout>
+
+    const element = <h1>Hello, world!</h1>;
+
+Questa strana sintassi con i tag non è né una stringa né HTML.
+
+E' invece un estensione della sintassi Javascript.
+
+**JSX produce “elementi React”**
+
+</Layout>
+
+---
+
+<Split>
+
+<img src="https://media.giphy.com/media/XHFP0ATcqRMDqjTUtp/giphy-downsized.gif" />
+# Disaccopiare, perché mai?
+
+la logica di renderizzazione è per sua stessa natura **accoppiata** con le altre logiche che governano la UI
+
+- la gestione degli eventi
+- il cambiamento dello stato nel tempo
+- la preparazione dei dati per la visualizzazione
+
+</Split>
+
+---
+
+<Layout>
+
+Al posto di disaccopiare forzatamente  il codice di markup e la logica
+
+React separa le responsabilità utilizzando unità debolmente accoppiate chiamate “componenti” che contengono entrambi.
+
+https://www.youtube.com/watch?v=x7cQ3mrcKaY
+
+</Layout>
+
+---
+
+<Layout>
+
+JSX verrà poi compilato da babel in codice javascript, e ogni tag trasformato in React.createElement(...)
+
+</Layout>
+
+---
+
+
+
+<CodeSurfer>
+
+```js  title="come usare le espressioni in jsx" subtitle="Ad esempio, 2 + 2, user.firstName o formatName(user) sono tutte espressioni JavaScript valide."
+
+    function formatName(user) {
+        return user.firstName + ' ' + user.lastName;
+    }
+
+    const user = {
+        firstName: 'Giuseppe',
+        lastName: 'Verdi'
+    };
+
+    const element = (
+        <h1>
+            Hello, {formatName(user)}!
+        </h1>
+    );
+
+    ReactDOM.render(
+        element,
+        document.getElementById('root')
+    );
+
+```
+
+</CodeSurfer>
+
+---
+
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js 
+
+const element = (
+  <h1>Hello</h1>
+);
+
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+
+```
+
+
+```js 
+
+"use strict";
+
+const element = React.createElement("h1", null, "Hello");
+ReactDOM.render(element, document.getElementById('root'));
+
+```
+
+</Step>
+
+
+<Step title="Inseriamo una variabile nel componente">
+
+```js 
+
+const name = 'Giuseppe Verdi';
+const element = <h1>Hello, {name}</h1>;
+
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+
+
+```
+
+
+```js 
+
+"use strict";
+
+const name = 'Giuseppe Verdi';
+const element = React.createElement("h1", null, "Hello, ", name);
+ReactDOM.render(element, document.getElementById('root'));
+
+```
+
+</Step>
+
+
+<Step title="Compichiamo la situazione">
+
+```js 
+
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Giuseppe',
+  lastName: 'Verdi'
+};
+
+const element = (
+  <h1>
+    Hello, {formatName(user)}!
+  </h1>
+);
+
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+
+```
+
+
+```js 
+
+"use strict";
+
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Giuseppe',
+  lastName: 'Verdi'
+};
+
+const element = React.createElement("h1", null, "Hello, ", formatName(user), "!");
+
+ReactDOM.render(element, document.getElementById('root'));
+
+```
+
+</Step>
+
+
+<Step>
+
+```js title="jsx"
+
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Giuseppe',
+  lastName: 'Verdi'
+};
+
+const subElement = <span>Benvenuto</span>;
+
+const element = <h1>Hello, {formatName(user)}! <subElement /></h1>;
+
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+
+```
+
+
+```js title="transpiled js" 
+
+
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Giuseppe',
+  lastName: 'Verdi'
+};
+
+const subElement = React.createElement("span", null, "Benvenuto");
+
+const element = React.createElement(
+        "h1", 
+        null, 
+        "Hello, ", 
+        formatName(user), 
+        "!", 
+        React.createElement("subElement", null)
+    );
+
+ReactDOM.render(element, document.getElementById('root'));
+
+```
+
+</Step>
+
+
+</CodeSurferColumns>
+
+---
+
+<Layout>
+
+https://babeljs.io/repl#?browsers=defaults%2C%20not%20ie%2011%2C%20not%20ie_mob%2011&build=&builtIns=false&spec=false&loose=false&code_lz=Q&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=false&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=env%2Creact%2Cstage-2%2Cenv&prettier=false&targets=&version=7.10.2&externalPlugins=
+
+</Layout>
+
+---
+
+<Layout>
+
+# JSX è un’Espressione
+
+Dopo la compilazione, le espressioni JSX diventano normali chiamate a funzioni JavaScript che producono oggetti JavaScript.
+
+</Layout>
+
+---
+
+<Layout>
+
+# JSX è un’Espressione
+
+Dopo la compilazione, le espressioni JSX diventano normali chiamate a funzioni JavaScript che producono oggetti JavaScript.
+
+</Layout>
+
+---
+
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```jsx 
+Questo significa che puoi utilizzare 
+
+JSX all’interno di istruzioni if e cicli for 🤯
+
+, assegnarlo a variabili, utilizzarlo come argomento di una funzione e restituirlo come risultato di una funzione
+```
+
+```jsx 
+    function getGreeting(user) {
+    if (user) {
+        return <h1>Hello, {formatName(user)}!</h1>;
+    }
+    return <h1>Hello, Stranger.</h1>;
+    }
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+
+<CodeSurfer>
+
+```jsx
+function getGreeting(user) {
+  if (user) {
+    return <h1>Hello, {formatName(user)}!</h1>;
+  }
+  return <h1>Hello, Stranger.</h1>;
+}
+```
+
+```js  title="transpiled js" 
+  function getGreeting(user) {
+      if )user)
+        return React.createElement(
+            h1, 
+            null, 
+            'Hello ', 
+            formatName(user), 
+            '!');
+    }
+
+    return React.createElement('h1', null, 'Hello, Stranger.');
+  }
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+#Specificare gli Attributi con JSX
+
+Puoi utilizzare le virgolette per valorizzare gli attributi con una stringa:
+
+    const element = <div tabIndex="0"></div>;
+
+Puoi anche utilizzare le parentesi graffe per includere un’espressione JavaScript
+
+    const element = <img src={user.avatarUrl}></img>;
+
+</Layout>
+
+---
+
+<Split>
+
+<img src="https://media.giphy.com/media/10NNJitHXAZnqw/giphy.gif" />
+
+# Attenzione
+
+all'interno delle parentisi graffe, negli attributi non puoi usare costrutti come if e for, dovrai far ricorso a espressioni come l'operatore ternario e map
+
+</Split>
+
+---
+
+<Layout>
+
+# Renderizzazione Condizionale
+
+La renderizzazione condizionale in React funziona nello stesso modo in cui funzionano le condizioni in JavaScript. 
+
+Puoi perciò usare operatori come if o l’operatore condizionale per creare elementi che rappresentano lo stato corrente cosicché React possa aggiornare la UI di conseguenza.
+
+</Layout>
+
+---
+
+
+<CodeSurfer title="" subtitle="">
+
+```js 
+
+function BenvenutoUtente(props) {
+  return <h1>Bentornato/a!</h1>;
+}
+
+function BenvenutoOspite(props) {
+  return <h1>Autenticati, per favore</h1>;
+}
+
+function Benvenuto(props) {
+  const utenteAutenticato = props.utenteAutenticato;
+  if (utenteAutenticato) {
+    return <BenvenutoUtente />;
+  }
+  return <BenvenutoOspite />;
+}
+
+ReactDOM.render(
+  // Prova a cambiare in utenteAutenticato={true}:
+  <Benvenuto utenteAutenticato={false} />,
+  document.getElementById('root')
+);
+```
+
+```js
+class ControlloLogin extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleLoginClick = this.handleLoginClick.bind(this);
+    this.handleLogoutClick = this.handleLogoutClick.bind(this);
+    this.state = {utenteAutenticato: false};
+  }
+
+  handleLoginClick() {
+    this.setState({utenteAutenticato: true});
+  }
+
+  handleLogoutClick() {
+    this.setState({utenteAutenticato: false});
+  }
+
+  render() {
+    const utenteAutenticato = this.state.utenteAutenticato;
+    let bottone;
+
+    if (utenteAutenticato) {
+      bottone = (
+        <BottoneLogout onClick={this.handleLogoutClick} />
+      );
+    } else {
+      bottone = (
+        <BottoneLogin onClick={this.handleLoginClick} />
+      );
+    }
+
+    return (
+      <div>
+        <Benvenuto utenteAutenticato={utenteAutenticato} />
+        {bottone}
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(
+  <ControlloLogin />,
+  document.getElementById('root')
+);
+```
+
+
+```js 17:30 title="La logica condizionale sta fuori dal return"
+class ControlloLogin extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleLoginClick = this.handleLoginClick.bind(this);
+    this.handleLogoutClick = this.handleLogoutClick.bind(this);
+    this.state = {utenteAutenticato: false};
+  }
+
+  handleLoginClick() {
+    this.setState({utenteAutenticato: true});
+  }
+
+  handleLogoutClick() {
+    this.setState({utenteAutenticato: false});
+  }
+
+  render() {
+    const utenteAutenticato = this.state.utenteAutenticato;
+    let bottone;
+
+    if (utenteAutenticato) {
+      bottone = (
+        <BottoneLogout onClick={this.handleLogoutClick} />
+      );
+    } else {
+      bottone = (
+        <BottoneLogin onClick={this.handleLoginClick} />
+      );
+    }
+
+    return (
+      <div>
+        <Benvenuto utenteAutenticato={utenteAutenticato} />
+        {bottone}
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(
+  <ControlloLogin />,
+  document.getElementById('root')
+);
+```
+
+```jsx 21:26
+class ControlloLogin extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleLoginClick = this.handleLoginClick.bind(this);
+    this.handleLogoutClick = this.handleLogoutClick.bind(this);
+    this.state = { utenteAutenticato: false };
+  }
+
+  handleLoginClick() {
+    this.setState({ utenteAutenticato: true });
+  }
+
+  handleLogoutClick() {
+    this.setState({ utenteAutenticato: false });
+  }
+
+  render() {
+    const utenteAutenticato = this.state.utenteAutenticato;
+
+    return (
+      <div>
+        <Benvenuto utenteAutenticato={utenteAutenticato} />
+        {utenteAutenticato ? 
+        <BottoneLogout onClick={this.handleLogoutClick} /> :
+        <BottoneLogin onClick={this.handleLoginClick} />}
+      </div>
+    );
+  }
+}
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Condizione If Inline con Operatore Logico &&
+
+</Layout>
+
+---
+
+
+<CodeSurfer>
+
+```js  subtitle="Puoi incorporare l’operatore logico JavaScript && nelle parentesi graffe, può tornare utile quando vogliamo includere un elemento condizionatamente"
+
+function CasellaDiPosta(props) {
+  const messaggiNonLetti = props.messaggiNonLetti;
+  return (
+    <div>
+      <h1>Ciao!</h1>
+      {messaggiNonLetti.length > 0 && (
+        <h2>
+          Hai {messaggiNonLetti.length} messaggi non letti.
+        </h2>
+      )}
+    </div>
+  );
+}
+
+const messaggi = ['React', 'Re: React', 'Re:Re: React'];
+ReactDOM.render(
+  <CasellaDiPosta messaggiNonLetti={messaggi} />,
+  document.getElementById('root')
+);
+
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# L'operatore logico || or
+
+</Layout>
+
+---
+
+
+<CodeSurfer>
+
+
+```js 
+
+import React from "react";
+import ReactDOM from "react-dom";
+
+
+function CasellaDiPosta(props) {
+  const messaggiNonLetti = props.messaggiNonLetti;
+  return (
+    <div>
+      <h1>Ciao!</h1>
+      {messaggiNonLetti.length || "nessuno"}
+    </div>
+  );
+}
+
+const messaggi = []; // const messaggi = ['pippo','pluto'];
+ReactDOM.render(
+  <CasellaDiPosta messaggiNonLetti={messaggi} />,
+  document.getElementById('root')
+);
+
+```
+
+
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Prevenire la Renderizzazione di un Componente
+
+</Layout>
+
+---
+
+
+<CodeSurfer title="" subtitle="">
+
+```js 
+
+function MessaggioAvviso(props) {
+  if (!props.attenzione) {
+    return null;
+  }
+
+  return <div className="warning">Attenzione!</div>;
+}
+
+class Pagina extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {mostraAvviso: true};
+    this.handleToggleClick = this.handleToggleClick.bind(
+      this
+    );
+  }
+
+  handleToggleClick() {
+    this.setState(state => ({
+      mostraAvviso: !state.mostraAvviso,
+    }));
+  }
+
+  render() {
+    return (
+      <div>
+        <MessaggioAvviso
+          attenzione={this.state.mostraAvviso}
+        />
+        <button onClick={this.handleToggleClick}>
+          {this.state.mostraAvviso ? 'Nascondi' : 'Mostra'}
+        </button>
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(
+  <Pagina />,
+  document.getElementById('root')
+);
+
+```
+
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Renderizzare Liste di Componenti
+
+Puoi creare liste di elementi e usarle in JSX usando le parentesi graffe {}.
+
+    const numeri = [1, 2, 3, 4, 5];
+    const lista = numeri.map((numero) =>
+      <li>{numero}</li>
+    );
+
+
+    ReactDOM.render(
+      <ul>{lista}</ul>,
+      document.getElementById('root')
+    );
+
+</Layout>
+
+---
+
+<Layout>
+
+# Chiavi
+
+Le chiavi aiutano React a identificare quali elementi sono stati aggiornati, aggiunti o rimossi.
+
+Le chiavi dovrebbero essere fornite agli elementi all’interno dell’array per dare agli elementi un’identità stabile
+
+</Layout>
+
+---
+
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+```js 
+
+const listaArticoli = articoli.map((articolo) =>
+  <li key={articolo.id}>
+    {articolo.testo}
+  </li>
+);
+
+```
+
+
+```js 
+
+const listaArticoli = articoli.map((articolo, indice) =>
+  // Fallo solo se gli elementi non hanno identificativi stabili
+  <li key={indice}>
+    {articolo.testo}
+  </li>
+);
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurfer>
+
+```js  title="JSX Previene gli Attacchi di Iniezione del Codice" subtitle="Utilizzare l’input degli utenti in JSX è sicuro"
+
+  const title = response.contenutoPotenzialmentePericoloso;
+  // Questo è sicuro:
+  const element = <h1>{title}</h1>;
+
+  //React DOM effettua automaticamente l’escape di 
+  //qualsiasi valore inserito in JSX prima di 
+  //renderizzarlo. 
+```
+
+```js title="E' possibile forzare il limite i XSS (cross-site-scripting)"
+
+  function createMarkup() { return {__html: 'First &middot; Second'}; };
+  <div dangerouslySetInnerHTML={createMarkup()} />
+```
+
+```js title="La scomodità nel forzare le cose aumenta la sicurezza"
+
+  function createMarkup() { return {__html: 'First &middot; Second'}; };
+  <div dangerouslySetInnerHTML={createMarkup()} />
+```
+</CodeSurfer>
+
+---
+
+<Layout>
+
+# Recap: JSX Rappresenta Oggetti
+
+Babel compila JSX in chiamate a React.createElement().
+
+</Layout>
+
+---
+
+
+<CodeSurferColumns themes={[...themesCode]}>
+
+<Step>
+
+```js 
+
+const element = (
+  <h1 className="greeting">
+    Hello, world!
+  </h1>
+)
+
+```
+
+```js 
+
+const element = React.createElement(
+  'h1',
+  {className: 'greeting'},
+  'Hello, world!'
+);
+
+```
+
+
+```js 
+
+const element = {
+  type: 'h1',
+  props: {
+    className: 'greeting',
+    children: 'Hello, world!'
+  }
+};
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<Layout>
+
+<Split>
+
+<img src="https://media.giphy.com/media/GzbILQ3Hz2eCk/giphy.gif" />
+
+Puoi usare react senza jsx
+
+</Split>
+
+</Layout>
+
+---
+
+
+<CodeSurferColumns themes={themesCode}>
+
+<Step>
+
+<div>
+  O usare un altra libreria come: 
+
+  **react-hyperscript**
+</div>
+
+
+
+```js 
+
+var h = require('react-hyperscript');
+
+return (
+  h('div.example', [
+    h('h1#heading', 'This is hyperscript'),
+    h('h2', 'creating React.js markup'),
+    h(AnotherComponent, {foo: 'bar'}, [
+      h('li', [
+        h('a', {href: 'http://whatever.com'}, 'One list item')
+      ]),
+      h('li', 'Another list item')
+    ])
+  ])
+);
+
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+
+<Layout>
+
+<Split>
+
+<img src="https://media.giphy.com/media/c3Xv5mtcTWde8/giphy.gif" />
+
+# Naturalmente scherzavo 🤪
+
+
+
+</Split>
+
+</Layout>

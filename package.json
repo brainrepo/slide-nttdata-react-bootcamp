@@ -9,6 +9,7 @@
     "htmlevents": "mdx-deck htmlevents.mdx",
     "eventloop": "mdx-deck eventloop.mdx",
     "reactevents": "mdx-deck reactevents.mdx",
+    "jsx": "mdx-deck jsx-tsx.mdx",
     "bootcamp:build": "mdx-deck build bootcamp.mdx"
   },
   "author": "",
